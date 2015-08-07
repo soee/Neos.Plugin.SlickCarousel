@@ -5,9 +5,13 @@
 # -----------------------------------------------------------------------------
 'M12.SlickCarousel:Slick':
   superTypes:
-    - 'TYPO3.Neos:Content'
+    'TYPO3.Neos:Content': TRUE
+    'TYPO3.Neos:ContentCollection': TRUE
+    'M12.Foundation:AbstractNodeTitle': TRUE
   ui:
     label: 'Slick carousel'
+    help:
+      message: "_Slick Slider_ is an easy, powerful, responsive image slider that allows users to swipe on touch-enabled devices."
     icon: 'icon-picture'
     inlineEditable: TRUE
     inspector:
@@ -27,12 +31,6 @@
           label: 'Carousel developer settings'
           position: 9
           tab: dev
-  constraints:
-    nodeTypes:
-      '*': FALSE # No children items allowed
-  childNodes:
-    content:
-      type: 'TYPO3.Neos:ContentCollection'
   properties:
     adaptiveHeight:
       type: boolean

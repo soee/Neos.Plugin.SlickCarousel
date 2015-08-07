@@ -1,12 +1,10 @@
 # M12.SlickCarousel:Slick
-prototype(M12.SlickCarousel:Slick) < prototype(TYPO3.Neos:Content) {
+prototype(M12.SlickCarousel:Slick) < prototype(M12.Foundation:Content) {
 	templatePath = 'resource://M12.SlickCarousel/Private/Templates/NodeTypes/Slick.html'
-	sectionName = 'slick'
-	
-	node = ${node}
-	
-	# Always generate default ID, no matter if user provided it or not
-	attributes.id = ${q(node).property('customHtmlId') ? String.trim(q(node).property('customHtmlId')) : 'slick-'+q(node).property('_nodeData.identifier')}
+	sectionName = 'sliderRoot'
+
+	attributes.id = ${q(node).property('customHtmlId') ? q(node).property('customHtmlId') : 'slick-'+q(node).property('_identifier')}
+	attributes.class.base = 'slick'
 
 	slickConfig = TYPO3.TypoScript:RawArray {
 		adaptiveHeight      = ${q(node).property('adaptiveHeight') ? true : false}
@@ -30,25 +28,35 @@ prototype(M12.SlickCarousel:Slick) < prototype(TYPO3.Neos:Content) {
 		vertical            = ${q(node).property('vertical') ? true : false}
 		rtl                 = ${q(node).property('rtl') ? true : false}
 	}
-	
-	@override.slickContainerAttributes = ${this.attributes}
-	
-	slickItems = TYPO3.Neos:ContentCollection {
-		nodePath = 'content'
-		
-		iterationName = 'iterator'
-		itemName = 'node'
+
+	slickContainerAttributes = ${this.attributes}
+
+	slickContent = TYPO3.TypoScript:Collection {
+		collection = ${q(node).children()}
 		itemRenderer = M12.SlickCarousel:SlickItem
+		itemName = 'node'
+		iterationName = 'iterator'
+
+		# Add additional wrapping to slick-content, because otherwise createjs won't work (it requires elements of contentcollection to be direct children of contentcollection).
+		# Can be removed when createjs is dropped.
+		@process.contentElementWrapping = TYPO3.Neos:ContentElementWrapping
 	}
+
+	@process.wrapRemover = M12.Utils:WrapRemover
+	@process.wrapRemover.wrapperClass = 'extra-wrapper-required-by-neos-backend'
 }
 
 # M12.SlickCarousel:SlickItem
-prototype(M12.SlickCarousel:SlickItem) < prototype(TYPO3.Neos:Content) {
-	templatePath = 'resource://M12.SlickCarousel/Private/Templates/NodeTypes/Slick.html'
-	sectionName = 'slickItem'
+prototype(M12.SlickCarousel:SlickItem) < prototype(TYPO3.TypoScript:Tag) {
+	tagName = 'div'
+	attributes.class = 'slick-item'
 
-	iterator = ${iterator}
-	slickContainerAttributes = ${slickContainerAttributes}
+	content = TYPO3.Neos:ContentCase
 
-	itemContent = TYPO3.Neos:ContentCase
+	prototype(TYPO3.Neos:Content) {
+		# Remove contentElementWrapping, because wrapping is already added for SlickItem (see below)
+		@process.contentElementWrapping >
+	}
+
+	@process.contentElementWrapping = TYPO3.Neos:ContentElementWrapping
 }
